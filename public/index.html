@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Top Gear - Marketplace de Autopeças</title>
+</head>
+<body>
+    <h1>Top Gear - Marketplace de Autopeças</h1>
+    <section>
+        <h2>Produtos</h2>
+        <div id="product-list"></div>
+    </section>
+    <section>
+        <h2>Gerar QR Code</h2>
+        <input type="text" id="payment-info" placeholder="Informações de pagamento">
+        <button id="generate-qrcode">Gerar QR Code</button>
+        <div class="qr-code" id="qr-code"></div>
+    </section>
+    <section>
+        <h2>Buscar CEP</h2>
+        <input type="text" id="cep" placeholder="Digite o CEP">
+        <button id="search-cep">Buscar</button>
+        <div id="address-info"></div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+            document.getElementById('generate-qrcode').addEventListener('click', generateQRCode);
+            document.getElementById('search-cep').addEventListener('click', searchCEP);
+        });
+
+        async function fetchProducts() {
+            const response = await fetch('/api/products');
+            const products = await response.json();
+            const productList = document.getElementById('product-list');
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+                productDiv.innerHTML = `<strong>${product.name}</strong><span>R$ ${product.price}</span>`;
+                productList.appendChild(productDiv);
+            });
+        }
+
+        async function generateQRCode() {
+            const paymentInfo = document.getElementById('payment-info').value;
+            const response = await fetch('/api/generate-qrcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentInfo })
+            });
+            const data = await response.json();
+            if (data.qrCodeUrl) {
+                document.getElementById('qr-code').innerHTML = `<img src="${data.qrCodeUrl}" alt="QR Code">`;
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function searchCEP() {
+            const cep = document.getElementById('cep').value;
+            const response = await fetch(`/api/cep/${cep}`);
+            const data = await response.json();
+            const addressInfo = document.getElementById('address-info');
+            if (response.ok) {
+                addressInfo.innerHTML = `<b>Endereço:</b>${data.localidade} - ${data.uf}`;
+            } else {
+                addressInfo.innerHTML = `<b>Erro:</b> ${data.error}`;
+            }
+        }
+    </script>
+</body>
+</html>
