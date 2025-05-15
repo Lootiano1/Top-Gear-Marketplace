@@ -64,7 +64,7 @@
             const data = await response.json();
             const addressInfo = document.getElementById('address-info');
             if (response.ok) {
-                addressInfo.innerHTML = `<b>Endereço:</b>${data.localidade} - ${data.uf}`;
+                addressInfo.innerHTML = `<b>Endereço: </b>${data.localidade} - ${data.uf}`;
             } else {
                 addressInfo.innerHTML = `<b>Erro:</b> ${data.error}`;
             }
